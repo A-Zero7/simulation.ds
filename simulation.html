@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stack and Queue Visualizer</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: #0b1020;
+    color: #eaf0ff;
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+}
+
+.app {
+    display: flex;
+    height: 100vh;
+}
+
+.sidebar {
+    width: 300px;
+    padding: 20px;
+    background: #11182c;
+    border-right: 1px solid #26304b;
+    overflow-y: auto;
+}
+
+.logo {
+    font-size: 22px;
+    font-weight: bold;
+    color: #8ab4ff;
+}
+
+.subtitle {
+    color: #8c98b8;
+    font-size: 12px;
+    line-height: 1.5;
+    margin: 6px 0 18px;
+}
+
+.section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.section-title {
+    color: #aab7d6;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+button,
+input,
+select {
+    width: 100%;
+    padding: 10px 12px;
+    border: none;
+    border-radius: 8px;
+    background: #202b47;
+    color: white;
+    font-size: 14px;
+    outline: none;
+}
+
+button {
+    cursor: pointer;
+    margin-bottom: 8px;
+}
+
+button:hover {
+    background: #344466;
+}
+
+button.primary {
+    background: #4169e1;
+}
+
+button.primary:hover {
+    background: #557cf0;
+}
+
+button.danger {
+    background: #a13e58;
+}
+
+input {
+    border: 1px solid #35415f;
+}
+
+.info-box {
+    padding: 10px;
+    margin-bottom: 16px;
+    border-radius: 9px;
+    background: #18223a;
+    color: #c2cde5;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.operations {
+    height: 150px;
+    overflow-y: auto;
+    padding: 10px;
+    border-radius: 9px;
+    background: #0b1223;
+    border: 1px solid #293653;
+    font-size: 12px;
+}
+
+.operation-item {
+    padding: 5px 0;
+    border-bottom: 1px solid #202b43;
+    color: #b9c6e5;
+}
+
+.empty-log {
+    color: #687795;
+}
+
+.help {
+    margin-top: 18px;
+    color: #7f8baa;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.topbar {
+    height: 68px;
+    padding: 18px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #0e1528;
+    border-bottom: 1px solid #202a43;
+}
+
+.heading {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.view-label {
+    color: #8e9abb;
+    font-size: 13px;
+}
+
+.canvas-wrap {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+}
+
+canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: grab;
+}
+
+canvas:active {
+    cursor: grabbing;
+}
+
+.hint {
+    position: absolute;
+    bottom: 18px;
+    left: 22px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    background: rgba(16, 24, 43, 0.85);
+    color: #9eaccb;
+    font-size: 12px;
+    pointer-events: none;
+}
+
+@media (max-width: 800px) {
+    .sidebar {
+        width: 240px;
+        padding: 14px;
+    }
+
+    .topbar {
+        padding: 14px;
+    }
+
+    .heading {
+        font-size: 16px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <aside class="sidebar">
+
+        <div class="logo">Data Structure Lab</div>
+
+        <div class="subtitle">
+            Stack and Queue visualizer with maximum size 5.
+        </div>
+
+        <div class="section">
+            <div class="section-title">Data Structure</div>
+
+            <select id="structureSelect">
+                <option value="stack">Stack</option>
+                <option value="queue">Queue</option>
+            </select>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Value</div>
+
+            <input
+                id="valueInput"
+                type="text"
+                placeholder="Enter value"
+            >
+        </div>
+
+        <div class="section">
+            <div class="section-title">Operations</div>
+
+            <button class="primary" id="insertButton">Push</button>
+            <button id="removeButton">Pop</button>
+            <button id="peekButton">👁 Peek</button>
+            <button id="emptyButton">Is Empty?</button>
+            <button class="danger" id="clearButton">Clear</button>
+            <button id="resetButton">Reset Camera</button>
+        </div>
+
+        <div class="info-box" id="statusBox">
+            Stack size: 0 / 5
+        </div>
+
+        <div class="section">
+            <div class="section-title">Operations Performed</div>
+
+            <div class="operations" id="operationsList">
+                <div class="empty-log">
+                    No operations performed yet.
+                </div>
+            </div>
+        </div>
+
+        <div class="help">
+            <b>Mouse controls</b><br>
+            Drag left/right: Rotate<br>
+            Shift + drag: Move screen<br>
+            Right drag: Move screen<br>
+            Mouse wheel: Zoom<br><br>
+            Camera cannot rotate underneath.
+        </div>
+
+    </aside>
+
+    <main class="main">
+
+        <div class="topbar">
+            <div class="heading" id="titleText">
+                Stack Visualization
+            </div>
+
+            <div class="view-label" id="viewLabel">
+                Normal Side View
+            </div>
+        </div>
+
+        <div class="canvas-wrap">
+            <canvas id="canvas"></canvas>
+
+            <div class="hint">
+                Drag to rotate • Shift/right-drag to move • Scroll to zoom
+            </div>
+        </div>
+
+    </main>
+
+</div>
+
+<script>
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+const structureSelect = document.getElementById("structureSelect");
+const valueInput = document.getElementById("valueInput");
+
+const insertButton = document.getElementById("insertButton");
+const removeButton = document.getElementById("removeButton");
+const peekButton = document.getElementById("peekButton");
+const emptyButton = document.getElementById("emptyButton");
+const clearButton = document.getElementById("clearButton");
+const resetButton = document.getElementById("resetButton");
+
+const statusBox = document.getElementById("statusBox");
+const operationsList = document.getElementById("operationsList");
+const titleText = document.getElementById("titleText");
+const viewLabel = document.getElementById("viewLabel");
+
+const MAX_SIZE = 5;
+
+let dataStructure = "stack";
+let values = [];
+let operations = [];
+
+let highlightedIndex = -1;
+let peekMode = false;
+
+let width = 0;
+let height = 0;
+
+const defaultCamera = {
+    rotationX: -0.12,
+    rotationY: 0,
+    zoom: 1.15,
+    moveX: 0,
+    moveY: 0
+};
+
+let rotationX = defaultCamera.rotationX;
+let rotationY = defaultCamera.rotationY;
+let zoom = defaultCamera.zoom;
+let moveX = defaultCamera.moveX;
+let moveY = defaultCamera.moveY;
+
+let cameraAnimation = null;
+
+let dragging = false;
+let moving = false;
+let lastMouseX = 0;
+let lastMouseY = 0;
+
+const colors = [
+    "#4f8cff",
+    "#9b6cff",
+    "#ff6b9d",
+    "#ffad5c",
+    "#38d9a9"
+];
+
+function resizeCanvas() {
+    const rect = canvas.getBoundingClientRect();
+
+    width = rect.width;
+    height = rect.height;
+
+    const dpr = window.devicePixelRatio || 1;
+
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+
+window.addEventListener("resize", resizeCanvas);
+
+function addOperation(message) {
+    const time = new Date().toLocaleTimeString();
+
+    operations.unshift(`${time} — ${message}`);
+
+    if (operations.length > 30) {
+        operations.pop();
+    }
+
+    renderOperations();
+}
+
+function renderOperations() {
+    if (operations.length === 0) {
+        operationsList.innerHTML =
+            '<div class="empty-log">No operations performed yet.</div>';
+
+        return;
+    }
+
+    operationsList.innerHTML = operations
+        .map(operation => {
+            return `<div class="operation-item">${operation}</div>`;
+        })
+        .join("");
+}
+
+function showMessage(message) {
+    statusBox.textContent = message;
+}
+
+function updateInterface() {
+    const isStack = dataStructure === "stack";
+
+    titleText.textContent = isStack
+        ? "Stack Visualization"
+        : "Queue Visualization";
+
+    insertButton.textContent = isStack
+        ? "Push"
+        : "Enqueue";
+
+    removeButton.textContent = isStack
+        ? "Pop"
+        : "Dequeue";
+
+    peekButton.textContent = peekMode
+        ? "↩ Return View"
+        : "👁 Peek";
+
+    viewLabel.textContent = peekMode
+        ? isStack ? "Top View" : "Front View"
+        : "Normal Side View";
+
+    statusBox.textContent =
+        `${isStack ? "Stack" : "Queue"} size: ${values.length} / ${MAX_SIZE}`;
+}
+
+function getCubeColor(index) {
+    return colors[index % colors.length];
+}
+
+function insertValue() {
+    if (values.length >= MAX_SIZE) {
+        const message =
+            `${dataStructure === "stack" ? "Stack" : "Queue"} overflow! Maximum size is 5.`;
+
+        showMessage(message);
+        addOperation(message);
+        return;
+    }
+
+    let value = valueInput.value.trim();
+
+    if (value === "") {
+        value = String(values.length + 1);
+    }
+
+    values.push(value);
+    valueInput.value = "";
+    highlightedIndex = -1;
+
+    const message = dataStructure === "stack"
+        ? `Push(${value})`
+        : `Enqueue(${value})`;
+
+    showMessage(message);
+    addOperation(message);
+    updateInterface();
+}
+
+function removeValue() {
+    if (values.length === 0) {
+        const message =
+            `${dataStructure === "stack" ? "Stack" : "Queue"} underflow! It is empty.`;
+
+        showMessage(message);
+        addOperation(message);
+        return;
+    }
+
+    let removed;
+
+    if (dataStructure === "stack") {
+        removed = values.pop();
+    } else {
+        removed = values.shift();
+    }
+
+    highlightedIndex = -1;
+
+    const message = dataStructure === "stack"
+        ? `Pop() → ${removed}`
+        : `Dequeue() → ${removed}`;
+
+    showMessage(message);
+    addOperation(message);
+    updateInterface();
+}
+
+function peekValue() {
+    if (values.length === 0) {
+        const message = "Cannot peek. Structure is empty.";
+
+        showMessage(message);
+        addOperation(message);
+        return;
+    }
+
+    peekMode = !peekMode;
+
+    if (dataStructure === "stack") {
+        highlightedIndex = values.length - 1;
+
+        if (peekMode) {
+            animateCameraTo(
+                -Math.PI / 2 + 0.08,
+                0,
+                1.45,
+                0,
+                20
+            );
+
+            const message =
+                `Peek() → ${values[values.length - 1]}`;
+
+            showMessage(message);
+            addOperation(message);
+        } else {
+            animateCameraToDefault();
+            highlightedIndex = -1;
+
+            showMessage("Returned to normal view.");
+            addOperation("Returned to normal view");
+        }
+    } else {
+        /*
+            QUEUE PEEK:
+            The first inserted element is always values[0].
+            For example:
+            values = [10, 20, 30]
+            Peek() returns 10.
+        */
+
+        highlightedIndex = 0;
+
+        if (peekMode) {
+            animateCameraTo(
+                -0.08,
+                Math.PI / 2,
+                1.55,
+                -115,
+                0
+            );
+
+            const message =
+                `Peek() → ${values[0]}`;
+
+            showMessage(message);
+            addOperation(message);
+        } else {
+            animateCameraToDefault();
+            highlightedIndex = -1;
+
+            showMessage("Returned to normal view.");
+            addOperation("Returned to normal view");
+        }
+    }
+
+    updateInterface();
+}
+
+function checkEmpty() {
+    const empty = values.length === 0;
+
+    const message = empty
+        ? `${dataStructure === "stack" ? "Stack" : "Queue"} is empty.`
+        : `${dataStructure === "stack" ? "Stack" : "Queue"} is not empty.`;
+
+    showMessage(message);
+
+    addOperation(
+        empty
+            ? "Is Empty() → true"
+            : "Is Empty() → false"
+    );
+}
+
+function clearValues() {
+    values = [];
+    highlightedIndex = -1;
+    peekMode = false;
+
+    animateCameraToDefault();
+
+    showMessage("Structure cleared.");
+    addOperation("Clear()");
+    updateInterface();
+}
+
+function resetCamera() {
+    peekMode = false;
+    highlightedIndex = -1;
+
+    animateCameraToDefault();
+
+    showMessage("Camera reset to normal side view.");
+    addOperation("Reset Camera");
+    updateInterface();
+}
+
+function animateCameraToDefault() {
+    animateCameraTo(
+        defaultCamera.rotationX,
+        defaultCamera.rotationY,
+        defaultCamera.zoom,
+        defaultCamera.moveX,
+        defaultCamera.moveY
+    );
+}
+
+function animateCameraTo(
+    targetX,
+    targetY,
+    targetZoom,
+    targetMoveX,
+    targetMoveY
+) {
+    cameraAnimation = {
+        startX: rotationX,
+        startY: rotationY,
+        startZoom: zoom,
+        startMoveX: moveX,
+        startMoveY: moveY,
+
+        targetX,
+        targetY,
+        targetZoom,
+        targetMoveX,
+        targetMoveY,
+
+        startTime: performance.now(),
+        duration: 650
+    };
+}
+
+function updateCameraAnimation() {
+    if (!cameraAnimation) return;
+
+    const progress = Math.min(
+        (performance.now() - cameraAnimation.startTime) /
+        cameraAnimation.duration,
+        1
+    );
+
+    const eased = 1 - Math.pow(1 - progress, 3);
+
+    rotationX =
+        cameraAnimation.startX +
+        (cameraAnimation.targetX - cameraAnimation.startX) * eased;
+
+    rotationY =
+        cameraAnimation.startY +
+        (cameraAnimation.targetY - cameraAnimation.startY) * eased;
+
+    zoom =
+        cameraAnimation.startZoom +
+        (cameraAnimation.targetZoom - cameraAnimation.startZoom) * eased;
+
+    moveX =
+        cameraAnimation.startMoveX +
+        (cameraAnimation.targetMoveX - cameraAnimation.startMoveX) * eased;
+
+    moveY =
+        cameraAnimation.startMoveY +
+        (cameraAnimation.targetMoveY - cameraAnimation.startMoveY) * eased;
+
+    if (progress >= 1) {
+        cameraAnimation = null;
+    }
+}
+
+function rotateCamera(deltaX, deltaY) {
+    rotationY += deltaX;
+    rotationX += deltaY;
+
+    // Prevent bottom/downward view.
+    rotationX = Math.max(
+        -Math.PI / 2 + 0.08,
+        Math.min(Math.PI / 2 - 0.08, rotationX)
+    );
+}
+
+function project(point) {
+    let x = point.x;
+    let y = point.y;
+    let z = point.z;
+
+    const cosY = Math.cos(rotationY);
+    const sinY = Math.sin(rotationY);
+
+    const rotatedX = x * cosY - z * sinY;
+    const rotatedZ = x * sinY + z * cosY;
+
+    x = rotatedX;
+    z = rotatedZ;
+
+    const cosX = Math.cos(rotationX);
+    const sinX = Math.sin(rotationX);
+
+    const rotatedY = y * cosX - z * sinX;
+    const finalZ = y * sinX + z * cosX;
+
+    y = rotatedY;
+    z = finalZ;
+
+    const scale = zoom * 75;
+
+    return {
+        x: width / 2 + (x + moveX / 75) * scale,
+        y: height / 2 - (y + moveY / 75) * scale,
+        depth: z
+    };
+}
+
+function drawPolygon(points, fill) {
+    ctx.beginPath();
+
+    points.forEach((point, index) => {
+        if (index === 0) {
+            ctx.moveTo(point.x, point.y);
+        } else {
+            ctx.lineTo(point.x, point.y);
+        }
+    });
+
+    ctx.closePath();
+
+    ctx.fillStyle = fill;
+    ctx.fill();
+
+    ctx.strokeStyle = "rgba(255,255,255,0.18)";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+}
+
+function drawCube(
+    x,
+    y,
+    z,
+    size,
+    color,
+    label,
+    highlighted
+) {
+    const half = size / 2;
+
+    const vertices = [
+        { x: x - half, y: y - half, z: z - half },
+        { x: x + half, y: y - half, z: z - half },
+        { x: x + half, y: y + half, z: z - half },
+        { x: x - half, y: y + half, z: z - half },
+
+        { x: x - half, y: y - half, z: z + half },
+        { x: x + half, y: y - half, z: z + half },
+        { x: x + half, y: y + half, z: z + half },
+        { x: x - half, y: y + half, z: z + half }
+    ];
+
+    const p = vertices.map(project);
+
+    if (highlighted) {
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 28;
+    }
+
+    drawPolygon(
+        [p[0], p[1], p[2], p[3]],
+        color
+    );
+
+    drawPolygon(
+        [p[1], p[5], p[6], p[2]],
+        shadeColor(color, -35)
+    );
+
+    drawPolygon(
+        [p[3], p[2], p[6], p[7]],
+        shadeColor(color, 30)
+    );
+
+    ctx.shadowBlur = 0;
+
+    const center = project({
+        x,
+        y,
+        z: z - 0.55
+    });
+
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 15px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    ctx.fillText(label, center.x, center.y);
+}
+
+function shadeColor(hex, amount) {
+    const color = hex.replace("#", "");
+
+    let r = parseInt(color.substring(0, 2), 16);
+    let g = parseInt(color.substring(2, 4), 16);
+    let b = parseInt(color.substring(4, 6), 16);
+
+    r = Math.max(0, Math.min(255, r + amount));
+    g = Math.max(0, Math.min(255, g + amount));
+    b = Math.max(0, Math.min(255, b + amount));
+
+    return "#" +
+        r.toString(16).padStart(2, "0") +
+        g.toString(16).padStart(2, "0") +
+        b.toString(16).padStart(2, "0");
+}
+
+function drawFloor() {
+    const floorY = -2.8;
+    const gridSize = 9;
+
+    for (let i = -gridSize; i <= gridSize; i++) {
+        const line1 = project({
+            x: -gridSize,
+            y: floorY,
+            z: i
+        });
+
+        const line2 = project({
+            x: gridSize,
+            y: floorY,
+            z: i
+        });
+
+        ctx.beginPath();
+        ctx.moveTo(line1.x, line1.y);
+        ctx.lineTo(line2.x, line2.y);
+        ctx.strokeStyle = "rgba(100,130,190,0.16)";
+        ctx.stroke();
+
+        const line3 = project({
+            x: i,
+            y: floorY,
+            z: -gridSize
+        });
+
+        const line4 = project({
+            x: i,
+            y: floorY,
+            z: gridSize
+        });
+
+        ctx.beginPath();
+        ctx.moveTo(line3.x, line3.y);
+        ctx.lineTo(line4.x, line4.y);
+        ctx.strokeStyle = "rgba(100,130,190,0.16)";
+        ctx.stroke();
+    }
+}
+
+function drawStack() {
+    const cubeSize = 1.35;
+
+    values.forEach((value, index) => {
+        const y =
+            index * 1.48 -
+            (values.length - 1) * 0.74;
+
+        drawCube(
+            0,
+            y,
+            0,
+            cubeSize,
+            getCubeColor(index),
+            value,
+            index === highlightedIndex
+        );
+    });
+}
+
+function drawQueue() {
+    const cubeSize = 1.35;
+
+    values.forEach((value, index) => {
+        let x;
+        let z;
+
+        if (peekMode) {
+            /*
+                IMPORTANT:
+                values[0] is the first inserted queue element.
+
+                The first element is placed closest to the camera.
+                Remaining elements are placed behind it.
+                Therefore Peek displays values[0].
+            */
+
+            x = 0;
+            z = index * 1.45;
+        } else {
+            /*
+                Normal queue view:
+                First element appears on the left.
+            */
+
+            x =
+                index * 1.55 -
+                (values.length - 1) * 0.775;
+
+            z = 0;
+        }
+
+        drawCube(
+            x,
+            0,
+            z,
+            cubeSize,
+            getCubeColor(index),
+            value,
+            index === highlightedIndex
+        );
+    });
+}
+
+function drawScene() {
+    updateCameraAnimation();
+
+    ctx.clearRect(0, 0, width, height);
+
+    const gradient = ctx.createLinearGradient(
+        0,
+        0,
+        0,
+        height
+    );
+
+    gradient.addColorStop(0, "#0c1428");
+    gradient.addColorStop(1, "#080d1a");
+
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, height);
+
+    drawFloor();
+
+    if (dataStructure === "stack") {
+        drawStack();
+    } else {
+        drawQueue();
+    }
+
+    requestAnimationFrame(drawScene);
+}
+
+// ---------------- MOUSE CONTROLS ----------------
+
+canvas.addEventListener("mousedown", function(event) {
+    dragging = true;
+
+    moving =
+        event.button === 2 ||
+        event.shiftKey;
+
+    lastMouseX = event.clientX;
+    lastMouseY = event.clientY;
+});
+
+canvas.addEventListener("mousemove", function(event) {
+    if (!dragging) return;
+
+    const deltaX = event.clientX - lastMouseX;
+    const deltaY = event.clientY - lastMouseY;
+
+    lastMouseX = event.clientX;
+    lastMouseY = event.clientY;
+
+    if (
+        moving ||
+        event.buttons === 2 ||
+        event.shiftKey
+    ) {
+        moveX += deltaX;
+        moveY -= deltaY;
+    } else {
+        rotateCamera(
+            deltaX * 0.008,
+            deltaY * 0.008
+        );
+    }
+});
+
+canvas.addEventListener("mouseup", function() {
+    dragging = false;
+});
+
+canvas.addEventListener("mouseleave", function() {
+    dragging = false;
+});
+
+canvas.addEventListener("contextmenu", function(event) {
+    event.preventDefault();
+});
+
+canvas.addEventListener("wheel", function(event) {
+    event.preventDefault();
+
+    zoom -= event.deltaY * 0.001;
+
+    zoom = Math.max(
+        0.55,
+        Math.min(2.5, zoom)
+    );
+}, { passive: false });
+
+// ---------------- BUTTON EVENTS ----------------
+
+structureSelect.addEventListener("change", function() {
+    dataStructure = structureSelect.value;
+
+    values = [];
+    highlightedIndex = -1;
+    peekMode = false;
+
+    animateCameraToDefault();
+
+    const message =
+        `Switched to ${dataStructure === "stack" ? "Stack" : "Queue"}.`;
+
+    showMessage(message);
+    addOperation(message);
+    updateInterface();
+});
+
+insertButton.addEventListener("click", insertValue);
+removeButton.addEventListener("click", removeValue);
+peekButton.addEventListener("click", peekValue);
+emptyButton.addEventListener("click", checkEmpty);
+clearButton.addEventListener("click", clearValues);
+resetButton.addEventListener("click", resetCamera);
+
+valueInput.addEventListener("keydown", function(event) {
+    if (event.key === "Enter") {
+        insertValue();
+    }
+});
+
+// ---------------- START ----------------
+
+resizeCanvas();
+renderOperations();
+updateInterface();
+requestAnimationFrame(drawScene);
+</script>
+
+</body>
+</html>
